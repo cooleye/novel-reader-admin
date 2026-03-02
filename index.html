@@ -100,7 +100,10 @@
                     <div id="generatedCodes" class="generated-codes">
                         <h4>生成的激活码：</h4>
                         <div class="codes-list" id="codesList"></div>
-                        <button class="btn btn-success" onclick="saveCodes()">保存到数据库</button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-success" onclick="saveCodes()">保存到数据库</button>
+                            <button class="btn" onclick="exportCodes()" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">📥 导出TXT</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -120,7 +123,9 @@
     </div>
 
     <script>
+        // API 配置 - 修改为你的 FC 地址
         const API_BASE = 'https://activatn-server-qbsbwzgfmw.cn-hangzhou.fcapp.run';
+        
         let tempGeneratedCodes = [];
         let authToken = localStorage.getItem('adminToken');
 
@@ -236,6 +241,37 @@
             } catch (error) {
                 alert('网络错误，请重试');
             }
+        }
+
+        // 导出激活码为TXT文件
+        function exportCodes() {
+            if (tempGeneratedCodes.length === 0) {
+                alert('没有可导出的激活码，请先生成');
+                return;
+            }
+            
+            // 生成TXT内容
+            const content = tempGeneratedCodes.join('\n');
+            
+            // 创建Blob
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            
+            // 创建下载链接
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `激活码_${new Date().toISOString().slice(0, 10)}_${tempGeneratedCodes.length}个.txt`;
+            
+            // 触发下载
+            document.body.appendChild(a);
+            a.click();
+            
+            // 清理
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // 显示提示
+            alert(`已导出 ${tempGeneratedCodes.length} 个激活码到TXT文件，可用于爱发电平台导入`);
         }
 
         async function loadCodesList() {
